@@ -7,12 +7,13 @@ require 'sqlite3'
 db = SQLite3::Database.new "golf_scores.db"
 
 # Create a "scores" table if it doesn't already exist
+db.execute "DROP TABLE IF EXISTS scores;"
 db.execute <<-SQL
   CREATE TABLE IF NOT EXISTS scores (
     id INTEGER PRIMARY KEY,
     player_name TEXT,
     score TEXT,
-    today_score TEXT,
+    today TEXT,
     thru TEXT
   );
 SQL
@@ -38,7 +39,7 @@ rows.each do |row|
     today = cols[4].text.strip
     thru = cols[5].text.strip
     players << "#{player_name}: #{score} (#{today}) [#{thru}]"
-    db.execute "INSERT INTO scores (player_name, score, today_score, thru) VALUES (?, ?, ?, ?)", player_name, score, today_score, thru
+    db.execute "INSERT INTO scores (player_name, score, today, thru) VALUES (?, ?, ?, ?)", player_name, score, today, thru
   end
 end
 
@@ -47,4 +48,9 @@ File.open("output.txt", "w") do |file|
   players.each do |player|
     file.puts(player)
   end
+end
+# Display the contents of the scores table
+puts "Scores table contents:"
+db.execute( "SELECT * FROM scores" ) do |row|
+  puts row.join("\t")
 end
