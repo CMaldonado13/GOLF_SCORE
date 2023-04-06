@@ -84,3 +84,9 @@ production:
   database: GOLF_SCORE_production
   username: GOLF_SCORE
   password: <%= ENV["GOLF_SCORE_DATABASE_PASSWORD"] %>
+
+development:
+  adapter: sqlite3
+  database: db/development.sqlite3
+  pool: 5
+  timeout: 5000
