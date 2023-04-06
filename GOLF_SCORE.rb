@@ -1,7 +1,21 @@
 require 'nokogiri'
 require 'net/http'
 require 'uri'
+require 'sqlite3'
 
+# Open a connection to the database
+db = SQLite3::Database.new "golf_scores.db"
+
+# Create a "scores" table if it doesn't already exist
+db.execute <<-SQL
+  CREATE TABLE IF NOT EXISTS scores (
+    id INTEGER PRIMARY KEY,
+    player_name TEXT,
+    score TEXT,
+    today_score TEXT,
+    thru TEXT
+  );
+SQL
 
 url = URI.parse('https://www.espn.com/golf/leaderboard')
 response = Net::HTTP.get_response(url)
@@ -24,6 +38,7 @@ rows.each do |row|
     today = cols[4].text.strip
     thru = cols[5].text.strip
     players << "#{player_name}: #{score} (#{today}) [#{thru}]"
+    db.execute "INSERT INTO scores (player_name, score, today_score, thru) VALUES (?, ?, ?, ?)", player_name, score, today_score, thru
   end
 end
 
