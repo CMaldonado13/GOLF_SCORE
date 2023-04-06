@@ -4,6 +4,9 @@ class ScoresController < ApplicationController
       require 'net/http'
       require 'uri'
       require 'sqlite3'
+      require 'csv'
+
+        csv_path = '/public/TeamList.csv'
   
       # Open a connection to the database
       db = SQLite3::Database.new "golf_scores.db"
@@ -21,7 +24,7 @@ class ScoresController < ApplicationController
           thru TEXT
         );
       SQL
-      = 
+      
       db.execute <<-SQL
       CREATE TABLE IF NOT EXISTS teams (
         id INTEGER PRIMARY KEY,
@@ -43,15 +46,22 @@ class ScoresController < ApplicationController
             ('Matt'),
             ('Owen');
             SQL
-        db.execute <<-SQL
-        CREATE TABLE IF NOT EXISTS team_assignments (
-            id INTEGER PRIMARY KEY,
-            team_id INTEGER,
-            player_id INTEGER,
-            FOREIGN KEY(team_id) REFERENCES teams(id),
-            FOREIGN KEY(player_id) REFERENCES scores(id)
-        );
-        SQL
+            db.execute <<-SQL
+            CREATE TABLE IF NOT EXISTS team_assignments (
+              id INTEGER PRIMARY KEY,
+              player_name TEXT,
+              team_number INTEGER,
+              FOREIGN KEY(team_number) REFERENCES teams(id),
+              FOREIGN KEY(player_name) REFERENCES scores(player_name)
+            );
+          SQL
+          
+          # Read the player assignments from a CSV file and insert them into the table
+          CSV.foreach(csv_path, headers: true) do |row|
+            player_name = row["player name"]
+            team_number = row["team number"]
+            db.execute("INSERT INTO team_assignments (player_name, team_number) VALUES (?, ?)", [player_name, team_number])
+          end
         
 
       url = URI.parse('https://www.espn.com/golf/leaderboard')
