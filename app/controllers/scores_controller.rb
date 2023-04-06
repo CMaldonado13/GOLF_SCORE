@@ -28,7 +28,9 @@ class ScoresController < ApplicationController
       db.execute <<-SQL
       CREATE TABLE IF NOT EXISTS teams (
         id INTEGER PRIMARY KEY,
-        owner TEXT
+        owner TEXT,
+        total_score INTEGER DEFAULT 0,
+        holes_played INTEGER DEFAULT 0
       );
         SQL
 
@@ -50,17 +52,17 @@ class ScoresController < ApplicationController
             CREATE TABLE IF NOT EXISTS team_assignments (
               id INTEGER PRIMARY KEY,
               player_name TEXT,
-              team_number INTEGER,
-              FOREIGN KEY(team_number) REFERENCES teams(id),
-              FOREIGN KEY(player_name) REFERENCES scores(player_name)
-            );
+              team_number INTEGER
+           );
           SQL
-          
+          counter = 0
           # Read the player assignments from a CSV file and insert them into the table
-          CSV.foreach(csv_path, headers: true) do |row|
-            player_name = row["player name"]
-            team_number = row["team number"]
+          CSV.foreach('/workspace/GOLF_SCORE/public/TeamList.csv', headers: ['player_name', 'team_number']) do |row|
+            break if counter == 55
+            player_name = row['player_name']
+            team_number = row['team_number']
             db.execute("INSERT INTO team_assignments (player_name, team_number) VALUES (?, ?)", [player_name, team_number])
+            counter += 1
           end
         
 
@@ -88,7 +90,44 @@ class ScoresController < ApplicationController
           db.execute "INSERT INTO scores (player_name, score, today, thru) VALUES (?, ?, ?, ?)", player_name, score, today, thru
         end
       end
+   # Calculate the total score for each team
+   # Query the database for all teams
+teams = db.execute "SELECT * FROM teams"
+
+# Iterate over each team and calculate the total score
+teams.each do |team|
+  # Query the database for all player assignments for the current team
+  player_assignments = db.execute("SELECT * FROM team_assignments WHERE team_number=?", team[0])
+
   
+  # Calculate the total score and total number of holes played for the current team
+  total_score = 0
+  holes_played = 0
+  player_assignments.each do |player_assignment|
+    # Query the database for the player's score and thru
+    score, thru = db.execute("SELECT score, thru FROM scores WHERE player_name=?", player_assignment[1]).first
+    if score
+        if score[0] != "WD"
+          total_score += score[0].to_i
+        else
+          puts "Warning: #{player_assignment[1]} has a score of WD"
+          total_score += 9
+        end
+        
+        if thru.is_a?(String) && thru.strip == "F"
+          holes_played += 18
+        elsif thru
+          holes_played += thru.to_i
+        end
+      end
+    end
+
+  # Update the teams table with the total score and total number of holes played for the current team
+  db.execute("UPDATE teams SET total_score=?, holes_played=? WHERE id=?", total_score, holes_played, team[0])
+end
+
+# Query the database for all teams (including the updated total scores)
+teams = db.execute "SELECT * FROM teams"
       # Write the list of player names and scores to a file
       File.open("output.txt", "w") do |file|
         players.each do |player|
@@ -99,5 +138,6 @@ class ScoresController < ApplicationController
       @scores = db.execute("SELECT * FROM scores")
        # Query the database for all teams
   @teams = db.execute "SELECT * FROM teams"
+  @team_assignments =db.execute "SELECT * FROM team_assignments"
     end
   end

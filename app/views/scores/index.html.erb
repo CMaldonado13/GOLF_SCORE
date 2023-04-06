@@ -26,6 +26,8 @@
     <tr>
       <th>Team Number</th>
       <th>Owner</th>
+      <th> Score </th>
+      <th> Thru </th>
     </tr>
   </thead>
   <tbody>
@@ -33,6 +35,25 @@
     <tr>
       <td><%= row[0] %></td> <!-- Team Number -->
       <td><%= row[1] %></td> <!-- Owner -->
+      <td><%= row[2] %></td> <!-- Total Score-->
+      <td><%= row[3] %></td> <!-- Thru-->
+
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Team</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @team_assignments.each do |row| %>
+    <tr>
+      <td><%= row[1] %></td> <!-- player_name -->
+      <td><%= row[2] %></td> <!-- team_number -->
 
     </tr>
   <% end %>
