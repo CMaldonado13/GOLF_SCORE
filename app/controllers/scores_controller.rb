@@ -27,20 +27,21 @@ class ScoresController < ApplicationController
         owner TEXT
       );
         SQL
+
         db.execute <<-SQL
-  INSERT INTO teams (owner) VALUES
-  ('Collin'),
-  ('John'),
-  ('Greyson'),
-  ('Sujay'),
-  ('Christian S'),
-  ('Mike'),
-  ('Nick'),
-  ('Christian M'),
-  ('JJ'),
-  ('Matt'),
-  ('Owen');
-SQL
+            INSERT INTO teams (owner) VALUES
+            ('Collin'),
+            ('John'),
+            ('Greyson'),
+            ('Sujay'),
+            ('Christian S'),
+            ('Mike'),
+            ('Nick'),
+            ('Christian M'),
+            ('JJ'),
+            ('Matt'),
+            ('Owen');
+            SQL
         db.execute <<-SQL
         CREATE TABLE IF NOT EXISTS team_assignments (
             id INTEGER PRIMARY KEY,
