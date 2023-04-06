@@ -117,7 +117,7 @@ teams.each do |team|
           total_score += 9
         end
       
-        if thru.is_a?(String) && thru.strip == "F"
+        if thru.is_a?(String) && (thru.strip == "F" || thru.strip == "WD")
           holes_played += 18
         elsif thru
           holes_played += thru.to_i
