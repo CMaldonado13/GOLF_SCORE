@@ -106,21 +106,24 @@ teams.each do |team|
   player_assignments.each do |player_assignment|
     # Query the database for the player's score and thru
     score, thru = db.execute("SELECT score, thru FROM scores WHERE player_name=?", player_assignment[1]).first
+    puts "#{player_assignment[1]}: #{score}, #{thru}" # Print the score and thru values for each player
     if score
-        if score[0] != "WD"
-          total_score += score[0].to_i
+        if score == "E"
+          total_score += 0
+        elsif score != "WD"
+          total_score += score.to_i
         else
           puts "Warning: #{player_assignment[1]} has a score of WD"
           total_score += 9
         end
-        
+      
         if thru.is_a?(String) && thru.strip == "F"
           holes_played += 18
         elsif thru
           holes_played += thru.to_i
         end
       end
-    end
+    end  
 
   # Update the teams table with the total score and total number of holes played for the current team
   db.execute("UPDATE teams SET total_score=?, holes_played=? WHERE id=?", total_score, holes_played, team[0])
