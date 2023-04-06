@@ -1,9 +1,40 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello, World!</title>
-  </head>
-  <body>
-    <h1>Hello, World!</h1>
-  </body>
-</html>
+
+<h1>Golf Scores</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Player Name</th>
+      <th>Score</th>
+      <th>Today</th>
+      <th>Thru</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @scores.each do |row| %>
+    <tr>
+      <td><%= row[1] %></td> <!-- player name -->
+      <td><%= row[2] %></td> <!-- score -->
+      <td><%= row[3] %></td> <!-- today -->
+      <td><%= row[4] %></td> <!-- thru -->
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+<table>
+  <thead>
+    <tr>
+      <th>Team Number</th>
+      <th>Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @teams.each do |row| %>
+    <tr>
+      <td><%= row[0] %></td> <!-- Team Number -->
+      <td><%= row[1] %></td> <!-- Owner -->
+
+    </tr>
+  <% end %>
+  </tbody>
+</table>
