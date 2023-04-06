@@ -21,6 +21,7 @@ class ScoresController < ApplicationController
           thru TEXT
         );
       SQL
+      = 
       db.execute <<-SQL
       CREATE TABLE IF NOT EXISTS teams (
         id INTEGER PRIMARY KEY,
