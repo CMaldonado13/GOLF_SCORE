@@ -1,6 +1,25 @@
 
 <h1>Golf Scores</h1>
+<table>
+  <thead>
+    <tr>
+    
+      <th>Owner</th>
+      <th> Score </th>
+      <th> Thru </th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @teams.sort_by{|row| row[2].to_i}.each do |row| %>
+    <tr>
+      <td><%= row[1] %></td> <!-- Owner -->
+      <td><%= row[2] %></td> <!-- Total Score-->
+      <td><%= row[3] %></td> <!-- Thru-->
 
+    </tr>
+  <% end %>
+  </tbody>
+</table>
 <table>
   <thead>
     <tr>
@@ -21,27 +40,7 @@
   <% end %>
   </tbody>
 </table>
-<table>
-  <thead>
-    <tr>
-      <th>Team Number</th>
-      <th>Owner</th>
-      <th> Score </th>
-      <th> Thru </th>
-    </tr>
-  </thead>
-  <tbody>
-  <% @teams.each do |row| %>
-    <tr>
-      <td><%= row[0] %></td> <!-- Team Number -->
-      <td><%= row[1] %></td> <!-- Owner -->
-      <td><%= row[2] %></td> <!-- Total Score-->
-      <td><%= row[3] %></td> <!-- Thru-->
 
-    </tr>
-  <% end %>
-  </tbody>
-</table>
 <table>
   <thead>
     <tr>

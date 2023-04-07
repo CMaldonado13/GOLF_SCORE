@@ -1,13 +1,15 @@
 class ScoresController < ApplicationController
-  require 'capybara/rspec'
-  include Capybara::DSL
+ 
     def index
       require 'nokogiri'
       require 'net/http'
       require 'uri'
       require 'sqlite3'
       require 'csv'
+      require 'json'
       require 'mechanize'
+      require 'open-uri'
+    
       
         csv_path = '/public/TeamList.csv'
   
@@ -67,36 +69,24 @@ class ScoresController < ApplicationController
             db.execute("INSERT INTO team_assignments (player_name, team_number) VALUES (?, ?)", [player_name, team_number])
             counter += 1
           end
-  # Visit the web page with Capybara
-  puts "Fetching webpage..."
-  visit 'https://golfweek.sportsdirectinc.com/golf/pga-results.aspx?page=/data/pga/leaderboard/leaderboard1_total.html'
-  sleep 5 # Pause for 5 seconds
-  html = page.body
-  
-  puts "Parsing HTML..."
-# Parse the HTML with Nokogiri and locate the table element by its XPath
-doc = Nokogiri::HTML(html)
-table = doc.css('body table#sdi-leaderboard-table').first
-rows = table.css('tr').drop(2)
-puts rows
-if table.nil?
-  puts "Table not found, HTML:"
-  puts html
-end
-cell = doc.at_xpath('/html/body/div[1]/div[2]/div[4]/div[2]/form/div[1]/div[10]/table/tbody/tr[3]/td[3]/a')
+  # Visit the web page with Mechanize
+url = 'https://golfweek.sportsdirectinc.com/golf/pga-results.aspx?page=/data/pga/leaderboard/leaderboard1_total.html'
+agent = Mechanize.new
+page = agent.get(url)
 
-# Extract the text content of the cell
-data = cell.text.strip
-puts data
-puts "Extracting data..."
-# Iterate through the rows and extract the data from each column
+# Parse the HTML with Nokogiri and locate the script element containing player details
+doc = Nokogiri::HTML(page.body)
+players_details = doc.css('script').text[/var playersDetails = (\[.*?\]);/m, 1]
+
+# Parse the JSON data and extract the player details
+players_details = JSON.parse(players_details)
+# Iterate through the players and output their details
 players = []
-rows.each do |row|
-  cols = row.css('td')
-  player_name = cols[2].css('a').text.strip
-  score = cols[5].text.strip
-  today = cols[4].text.strip
-  thru = cols[6].text.strip
+players_details.each do |player|
+  player_name = player["playerName"]
+  score = player["total"]
+  today = player["inProgressCurrScore"]
+  thru = player["thru"]
   players << "#{player_name}: #{score} (#{today}) [#{thru}]"
   db.execute "INSERT INTO scores (player_name, score, today, thru) VALUES (?, ?, ?, ?)", player_name, score, today, thru
 end
@@ -109,7 +99,7 @@ teams.each do |team|
   player_assignments = db.execute("SELECT * FROM team_assignments WHERE team_number=?", team[0])
   # Calculate the total score and total number of holes played for the current team
   total_score = 0
-  holes_played = 0
+  holes_played = 90
   player_assignments.each do |player_assignment|
     # Query the database for the player's score and thru
     score, thru = db.execute("SELECT score, thru FROM scores WHERE player_name=?", player_assignment[1]).first
@@ -140,9 +130,7 @@ end
 teams = db.execute "SELECT * FROM teams"
       # Display the contents of the scores table
   @scores = db.execute("SELECT * FROM scores")
-  puts @scores.inspect
-  puts "hello"
-       # Query the database for all teams
+  # Query the database for all teams
   @teams = db.execute "SELECT * FROM teams"
   @team_assignments =db.execute "SELECT * FROM team_assignments"
     end
