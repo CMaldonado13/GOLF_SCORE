@@ -1,14 +1,11 @@
 class ScoresController < ApplicationController
-  require 'capybara/rspec'
-  include Capybara::DSL
     def index
       require 'nokogiri'
       require 'net/http'
       require 'uri'
       require 'sqlite3'
       require 'csv'
-      require 'mechanize'
-      
+
         csv_path = '/public/TeamList.csv'
   
       # Open a connection to the database
@@ -67,42 +64,32 @@ class ScoresController < ApplicationController
             db.execute("INSERT INTO team_assignments (player_name, team_number) VALUES (?, ?)", [player_name, team_number])
             counter += 1
           end
-  # Visit the web page with Capybara
-  puts "Fetching webpage..."
-  visit 'https://golfweek.sportsdirectinc.com/golf/pga-results.aspx?page=/data/pga/leaderboard/leaderboard1_total.html'
-  sleep 5 # Pause for 5 seconds
-  html = page.body
-  
-  puts "Parsing HTML..."
-# Parse the HTML with Nokogiri and locate the table element by its XPath
-doc = Nokogiri::HTML(html)
-table = doc.css('body table#sdi-leaderboard-table').first
-rows = table.css('tr').drop(2)
-puts rows
-if table.nil?
-  puts "Table not found, HTML:"
-  puts html
-end
-cell = doc.at_xpath('/html/body/div[1]/div[2]/div[4]/div[2]/form/div[1]/div[10]/table/tbody/tr[3]/td[3]/a')
+        
 
-# Extract the text content of the cell
-data = cell.text.strip
-puts data
-puts "Extracting data..."
-# Iterate through the rows and extract the data from each column
-players = []
-rows.each do |row|
-  cols = row.css('td')
-  player_name = cols[2].css('a').text.strip
-  score = cols[5].text.strip
-  today = cols[4].text.strip
-  thru = cols[6].text.strip
-  players << "#{player_name}: #{score} (#{today}) [#{thru}]"
-  db.execute "INSERT INTO scores (player_name, score, today, thru) VALUES (?, ?, ?, ?)", player_name, score, today, thru
-end
+          # Open the webpage and create a Nokogiri document object
+          url = URI.parse('https://golfweek.sportsdirectinc.com/golf/pga-results.aspx?page=/data/pga/leaderboard/leaderboard1_total.html')
+          response = Net::HTTP.get_response(url)
+          html = response.body
+          
+          # Parse the HTML with Nokogiri and locate the table element by its ID
+          doc = Nokogiri::HTML(html)
+          table = doc.css('#sdi-leaderboard-table').first
+          rows = table.css('tr').drop(2)
+          
+          # Iterate through the rows and extract the data from the "PLAYER" column
+          players = []
+          rows.each do |row|
+            player_name = row.css('td:nth-child(3) .name').text.strip
+            today = row.css('td:nth-child(4)').text.strip
+            thru = row.css('td:nth-child(5)').text.strip
+            score = row.css('td:nth-child(6)').text.strip
+            players << "#{player_name}: #{score} (#{today}) [#{thru}]"
+            db.execute "INSERT INTO scores (player_name, score, today, thru) VALUES (?, ?, ?, ?)", player_name, score, today, thru
+          end
    # Calculate the total score for each team
    # Query the database for all teams
 teams = db.execute "SELECT * FROM teams"
+
 # Iterate over each team and calculate the total score
 teams.each do |team|
   # Query the database for all player assignments for the current team
@@ -136,12 +123,8 @@ teams.each do |team|
   db.execute("UPDATE teams SET total_score=?, holes_played=? WHERE id=?", total_score, holes_played, team[0])
 end
 
-# Query the database for all teams (including the updated total scores)
-teams = db.execute "SELECT * FROM teams"
-      # Display the contents of the scores table
+  # Display the contents of the scores table
   @scores = db.execute("SELECT * FROM scores")
-  puts @scores.inspect
-  puts "hello"
        # Query the database for all teams
   @teams = db.execute "SELECT * FROM teams"
   @team_assignments =db.execute "SELECT * FROM team_assignments"
