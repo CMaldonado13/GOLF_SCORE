@@ -11,7 +11,7 @@ class ScoresController < ApplicationController
       require 'open-uri'
     
       
-        csv_path = '/public/TeamList.csv'
+        csv_path = '/app/public/TeamList.csv'
   
       # Open a connection to the database
       db = SQLite3::Database.new "golf_scores.db"
