@@ -11,7 +11,8 @@ class ScoresController < ApplicationController
       require 'open-uri'
     
       
-        csv_path = '/app/public/TeamList.csv'
+      csv_path = Rails.root.join('public', 'TeamList.csv')
+
   
       # Open a connection to the database
       db = SQLite3::Database.new "golf_scores.db"
@@ -62,7 +63,7 @@ class ScoresController < ApplicationController
           SQL
           counter = 0
           # Read the player assignments from a CSV file and insert them into the table
-          CSV.foreach('/workspace/GOLF_SCORE/public/TeamList.csv', headers: ['player_name', 'team_number']) do |row|
+          CSV.foreach(csv_path, headers: ['player_name', 'team_number']) do |row|
             break if counter == 55
             player_name = row['player_name']
             team_number = row['team_number']
