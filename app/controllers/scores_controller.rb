@@ -108,7 +108,7 @@ teams.each do |team|
     if score
         if score == "E"
           total_score += 0
-        elsif score != "WD"
+        elsif score != "-"
           total_score += score.to_i
         else
           puts "Warning: #{player_assignment[1]} has a score of WD"
