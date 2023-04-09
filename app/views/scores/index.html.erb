@@ -1,24 +1,71 @@
+<style>
+  table {
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid black;
+  }
+  
+  th {
+    background-color: #e6e6e6;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+</style>
 
 <h1>Golf Scores</h1>
+
 <table>
   <thead>
     <tr>
-    
       <th>Owner</th>
-      <th> Score </th>
-      <th> Thru </th>
+      <th>Score</th>
+      <th>Holes Remaining</th>
     </tr>
   </thead>
   <tbody>
-  <% @teams.sort_by{|row| row[2].to_i}.each do |row| %>
+    <% @teams.sort_by{|row| row[2].to_i}.each do |row| %>
     <tr>
       <td><%= row[1] %></td> <!-- Owner -->
       <td><%= row[2] %></td> <!-- Total Score-->
-      <td><%= row[3] %></td> <!-- Thru-->
-
+      <td><%= row[3] %></td> <!-- team_holes-->
     </tr>
-  <% end %>
+    <% end %>
   </tbody>
+</table>
+<table>
+ <thead>
+  <tr>
+   <th>  </th>
+   <th> Max Score </th>
+  </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>Round 1</td>
+ <td><%= @max_r1 %></td>
+</tr>
+<tr>
+ <td>Round 2</td>
+ <td><%= @max_r2 %></td>
+</tr>
+<tr>
+ <td>Round 3</td>
+ <td><%= @max_r3 %></td>
+</tr>
+<tr>
+ <td>Round 4</td>
+ <td><%= @max_r4 %></td>
+</tr>
+ </tbody>
+</table>
+
 </table>
 <table>
   <thead>
@@ -27,17 +74,29 @@
       <th>Score</th>
       <th>Today</th>
       <th>Thru</th>
+      <th>R1</th>
+      <th>R2</th>
+      <th>R3</th>
+      <th>R4</th>
+      <th>Position</th>
+      <th>Pool Scores</th>
     </tr>
   </thead>
   <tbody>
-  <% @scores.each do |row| %>
+    <% @scores.each do |row| %>
     <tr>
       <td><%= row[1] %></td> <!-- player_name -->
       <td><%= row[2] %></td> <!-- score -->
       <td><%= row[3] %></td> <!-- today -->
       <td><%= row[4] %></td> <!-- thru -->
+      <td><%= row[5] %></td> <!-- R1 -->
+      <td><%= row[6] %></td> <!-- R2 -->
+      <td><%= row[7] %></td> <!-- R3 -->
+      <td><%= row[8] %></td> <!-- R4 -->
+      <td><%= row[9] %></td> <!-- position -->
+      <td><%= row[11] %></td> <!-- pool_score -->
     </tr>
-  <% end %>
+    <% end %>
   </tbody>
 </table>
 
@@ -49,12 +108,11 @@
     </tr>
   </thead>
   <tbody>
-  <% @team_assignments.each do |row| %>
+    <% @team_assignments.each do |row| %>
     <tr>
       <td><%= row[1] %></td> <!-- player_name -->
       <td><%= row[2] %></td> <!-- team_number -->
-
     </tr>
-  <% end %>
+    <% end %>
   </tbody>
 </table>
